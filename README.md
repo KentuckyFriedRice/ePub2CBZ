@@ -8,3 +8,5 @@ finally zipping that folder into cbz format.
 
 It doesn't work every time yet, but I will be making modifications in the future to cover more layouts within
 the epubs
+
+epub2cbz filename.epub
