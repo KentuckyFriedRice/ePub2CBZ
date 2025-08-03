@@ -1,0 +1,58 @@
+#!/bin/sh
+
+originalDir=$(pwd)
+filename=$1
+temp=null
+
+echo "Making working directory"
+mkdir -p .working
+
+temp=${filename%.epub}.zip
+echo "Copying ${filename} to Working"
+cp -f $filename .working/${filename%.epub}.zip
+filename=$temp
+
+cd .working
+
+echo "unzipping $filename" 
+unzip -oq $filename
+
+echo "copying images"
+mkdir -p pics
+
+imageDir=$(find . -type d -name images)
+cp -f $imageDir/* pics/
+
+cd pics
+numberOfFiles=$(ls | wc -l)
+echo $numberOfFiles
+
+mkdir -p new
+
+cp -f cover.jpeg new/0.jpeg
+
+imageCount=1
+ 
+for i in $(seq 1 2 $((numberOfFiles-1)))
+do
+	if [ $((i + 1)) -lt $((numberOfFiles-1)) ]; then
+		#echo ${i} 
+		#echo $((i+1))
+		echo $imageCount
+		magick img_${i}.jpeg img_$((i+1)).jpeg +append new/${imageCount}.jpeg
+		imageCount=$((imageCount+1))
+	else
+		cp img_${i}.jpeg new/${imageCount}.jpeg
+	fi
+done
+
+filename=${filename%.zip}.cbz
+
+zip -q $filename new/*
+
+
+mkdir -p converted
+mv $filename $originalDir/converted
+cd $originalDir
+rm -r .working/*
+rmdir  .working

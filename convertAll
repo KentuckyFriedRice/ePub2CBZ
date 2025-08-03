@@ -1,0 +1,6 @@
+for epub in *.epub; do
+    [ -e "$epub" ] || continue  # skip if no .epub files
+    echo "Processing: $epub"
+    ./epub2cbz "$epub"
+done
+
