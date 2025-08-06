@@ -1,0 +1,78 @@
+#!/bin/bash
+
+originalDir=$(pwd)
+filename=$1
+temp=null
+
+echo "Making working directory"
+mkdir -p .working_$$
+
+temp=${filename%.epub}.zip
+echo "Copying ${filename} to Working"
+cp -f $filename .working_$$/${filename%.epub}.zip
+filename=$temp
+
+cd .working_$$
+
+echo "unzipping $filename" 
+unzip -oq $filename
+
+echo "copying images"
+mkdir -p pics
+
+imageDir=$(find . -type d -name images)
+cp -f $imageDir/* pics/
+
+cd pics
+#numberOfFiles=$(ls | wc -l)
+#echo $numberOfFiles
+
+mkdir -p new
+
+readarray -t fileList < <(find . -maxdepth 1 -type f \( -iname '*.jpeg' -o -iname '*.jpg' -o -iname '*.png' \) | sort -V | cut -c3-)
+fileListLength=${#fileList[@]}
+
+imageCount=1
+barWidth=40
+
+magick ${fileList[0]} new/0.png
+
+echo "Working..."
+ 
+for i in $(seq 1 2 $((fileListLength-1)))
+do
+	if [ $((i + 1)) -le $((fileListLength-1)) ]; then
+		#echo ${fileList[i]}
+		#echo ${fileList[i+1]}
+		#echo $imageCount
+		magick ${fileList[i]} ${fileList[i+1]} +append new/${imageCount}.png
+		imageCount=$((imageCount+1))
+
+	else
+		magick ${fileList[i]} new/${imageCount}.png
+	fi
+
+	percent=$(( (i + 1) * 100 / $fileListLength ))
+    	filled=$((percent * barWidth / 100))
+    	empty=$((barWidth - filled))
+    	bar=$(printf "%0.s#" $(seq 1 $filled))
+    	space=$(printf "%0.s-" $(seq 1 $empty))
+
+    	printf "\r[%s%s] %3d%%" "$bar" "$space" "$percent"
+done
+
+bar=$(printf "%0.s#" $(seq 1 $barWidth))
+printf "\r[%s] - 100%% Done!\n" "$bar"
+
+echo "Finsihing up..."
+
+filename=${filename%.zip}.cbz
+
+zip -q $filename new/*
+
+
+mkdir -p converted
+mv $filename $originalDir/converted
+cd $originalDir
+rm -r .working_$$/*
+rmdir  .working_$$

@@ -1,58 +1,56 @@
-#!/bin/sh
+#!/bin/bash
 
-originalDir=$(pwd)
-filename=$1
-temp=null
+# Defaults
+target_dir="."
+max_parallel=5
+single_file=""
 
-echo "Making working directory"
-mkdir -p .working
-
-temp=${filename%.epub}.zip
-echo "Copying ${filename} to Working"
-cp -f $filename .working/${filename%.epub}.zip
-filename=$temp
-
-cd .working
-
-echo "unzipping $filename" 
-unzip -oq $filename
-
-echo "copying images"
-mkdir -p pics
-
-imageDir=$(find . -type d -name images)
-cp -f $imageDir/* pics/
-
-cd pics
-numberOfFiles=$(ls | wc -l)
-echo $numberOfFiles
-
-mkdir -p new
-
-cp -f cover.jpeg new/0.jpeg
-
-imageCount=1
- 
-for i in $(seq 1 2 $((numberOfFiles-1)))
-do
-	if [ $((i + 1)) -lt $((numberOfFiles-1)) ]; then
-		#echo ${i} 
-		#echo $((i+1))
-		echo $imageCount
-		magick img_${i}.jpeg img_$((i+1)).jpeg +append new/${imageCount}.jpeg
-		imageCount=$((imageCount+1))
-	else
-		cp img_${i}.jpeg new/${imageCount}.jpeg
-	fi
+# Parse options and arguments
+while getopts "d:n:" opt; do
+  case $opt in
+    d) target_dir="$OPTARG" ;;
+    n) max_parallel="$OPTARG" ;;
+    *) 
+      echo "Usage: $0 [-d directory] [-n max_parallel] [file.epub]"
+      exit 1
+      ;;
+  esac
 done
 
-filename=${filename%.zip}.cbz
+shift $((OPTIND - 1))
 
-zip -q $filename new/*
+# Check if a single file is passed as an argument
+if [ $# -gt 0 ]; then
+  single_file="$1"
+fi
 
+# Check conversion script exists
+convert_script="./epub2cbz_converter"
+if [ ! -x "$convert_script" ]; then
+  echo "Error: Conversion script $convert_script not found or not executable."
+  exit 1
+fi
 
-mkdir -p converted
-mv $filename $originalDir/converted
-cd $originalDir
-rm -r .working/*
-rmdir  .working
+# Convert single file
+if [ -n "$single_file" ]; then
+  if [ ! -f "$single_file" ]; then
+    echo "Error: File '$single_file' does not exist."
+    exit 1
+  fi
+
+  echo "Converting single file: $single_file"
+  "$convert_script" "$single_file"
+  exit $?
+fi
+
+# Convert batch of files
+if [ ! -d "$target_dir" ]; then
+  echo "Error: Directory '$target_dir' does not exist."
+  exit 1
+fi
+
+echo "Converting all EPUBs in '$target_dir' with up to $max_parallel jobs..."
+
+find "$target_dir" -maxdepth 1 -type f -iname '*.epub' -print0 | \
+xargs -0 -P "$max_parallel" -I {} "$convert_script" "{}"
+
