@@ -1,8 +1,34 @@
 #!/bin/bash
 
+#default values
+japaneseMode=0
 originalDir=$(pwd)
-filename=$1
-temp=null
+temp=""
+imageDir=""
+cover=""
+
+
+#options
+while getopts "c:i:j" opt; do
+	case $opt in
+ 		j) japaneseMode=1 ;;
+ 	     	i) imageDir="$OPTARG" ;;
+		c) cover="$originalDir/$OPTARG" ;;
+		*)
+        	exit 1
+        	;;
+   	esac
+done
+
+shift $((OPTIND - 1))
+
+filename=${!#}
+
+echo "This is the cover "+$cover
+
+if [ $japaneseMode -eq 1 ]; then
+	echo "ほう… 向かってくるのか…　逃げずにこのソフトに近づいてくるのか…"
+fi
 
 echo "Making working directory"
 mkdir -p .working_$$
@@ -20,7 +46,9 @@ unzip -oq $filename
 echo "copying images"
 mkdir -p pics
 
-imageDir=$(find . -type d -name images)
+if [ -z "$imageDir" ]; then
+	imageDir=$(find . -type d -name images)
+fi
 cp -f $imageDir/* pics/
 
 cd pics
@@ -35,17 +63,33 @@ fileListLength=${#fileList[@]}
 imageCount=1
 barWidth=40
 
-magick ${fileList[0]} new/0.png
+startNum=0
+if [ -z "$cover" ]; then
+	coverCheck=$(find "$originalDir/.working_$$/" -type f -iname cover.jpeg | head -n 1)
+	if [ -n coverCheck ]; then
+		cover=$coverCheck
+	else
+		cover=${fileList[0]}
+	fi
+	startNum=1
+fi
+
+echo "THis is the cover "+$cover
+magick $cover new/0.png
 
 echo "Working..."
  
-for i in $(seq 1 2 $((fileListLength-1)))
+for i in $(seq $startNum 2 $((fileListLength-1)))
 do
 	if [ $((i + 1)) -le $((fileListLength-1)) ]; then
 		#echo ${fileList[i]}
 		#echo ${fileList[i+1]}
 		#echo $imageCount
-		magick ${fileList[i]} ${fileList[i+1]} +append new/${imageCount}.png
+		if [ $japaneseMode -eq 1 ]; then
+			magick ${fileList[i+1]} ${fileList[i]} +append new/${imageCount}.png
+		else
+			magick ${fileList[i]} ${fileList[i+1]} +append new/${imageCount}.png
+		fi
 		imageCount=$((imageCount+1))
 
 	else
@@ -64,14 +108,31 @@ done
 bar=$(printf "%0.s#" $(seq 1 $barWidth))
 printf "\r[%s] - 100%% Done!\n" "$bar"
 
-echo "Finsihing up..."
+if [ $japaneseMode -eq 1 ]; then
+	imageCount=$((imageCount+1))
+	magick $cover new/${imageCount}.png
+	
+	readarray -t fileList < <(find . -maxdepth 1 -type f \( -iname '*.jpeg' -o -iname '*.jpg' -o -iname     '*.png' \) | sort -V | cut -c3-)
+	
+
+	# Reverse the array
+	for ((i=0, j=${#fileList[@]}-1; i<j; i++, j--)); do
+    		tmp="tmp_$i"
+    		mv "${fileList[i]}" "$tmp"             # move first to tmp
+    		mv "${fileList[j]}" "${fileList[i]}"      # move last to first
+    		mv "$tmp" "${fileList[j]}"             # move tmp to last
+
+	done
+fi
+
+echo "Finishing up..."
 
 filename=${filename%.zip}.cbz
 
 zip -q $filename new/*
 
 
-mkdir -p converted
+mkdir -p $originalDir/converted
 mv $filename $originalDir/converted
 cd $originalDir
 rm -r .working_$$/*
