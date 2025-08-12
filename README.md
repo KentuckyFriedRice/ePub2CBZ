@@ -10,3 +10,13 @@ It doesn't work every time yet, but I will be making modifications in the future
 the epubs
 
 epub2cbz [-i jumbled_mode] [-j Japan_mode] [-d directory_mode] [file.epub | directory]
+
+-i jumbled_mode   -- This is for when the images are out of order. This option invokes imageRenamer and checks through 
+                     html files. I've only needed it once so it only works in one scenario. For now.
+
+-j Japan_mode     -- This reverses the images for reading right-to-left. It adds an extra cover at the end then
+                     reverses the order of the images. This way you can read from the back and swipe right instead
+                     of left.
+
+-d directory_mode -- This just specifies the input is a directory name (use . for current directory) rather than a
+                     single epub file and it will convert all epub files in that directory.
