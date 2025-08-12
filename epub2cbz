@@ -1,56 +1,60 @@
 #!/bin/bash
 
-# Defaults
-target_dir="."
-max_parallel=5
-single_file=""
+directoryBool=0
+options=""
 
-# Parse options and arguments
-while getopts "d:n:" opt; do
-  case $opt in
-    d) target_dir="$OPTARG" ;;
-    n) max_parallel="$OPTARG" ;;
-    *) 
-      echo "Usage: $0 [-d directory] [-n max_parallel] [file.epub]"
-      exit 1
-      ;;
-  esac
+while getopts "c:dji" opt; do
+	case $opt in
+		c) options+=" -c $OPTARG" ;;
+		i) options+=" -i" ;;
+		d) directoryBool=1 ;;
+		j) options+=" -j" ;;
+		*)
+		  echo "Usage: $0 [-i jumbled] [-j Japan_mode] [-d directory] [file.epub | directory]"
+		  exit 1
+		;;
+	esac
 done
 
 shift $((OPTIND - 1))
 
-# Check if a single file is passed as an argument
-if [ $# -gt 0 ]; then
-  single_file="$1"
+input="${!#}"
+ 
+if [ ! -x "epub2cbz_converter" ]; then
+	echo "You need 'epub2cbz_converter' and it wasn't found in this directory or it's not executable"
+	exit 1
+fi
+if [ ! -x "imageRenamer" ]; then
+	echo "You need 'imageRenamer' and it wasn't found in this directory or it's not executable"
+	exit 1
 fi
 
-# Check conversion script exists
-convert_script="./epub2cbz_converter"
-if [ ! -x "$convert_script" ]; then
-  echo "Error: Conversion script $convert_script not found or not executable."
-  exit 1
+if [ $directoryBool -eq 1 ]; then
+	if [ ! -d "$input" ]; then
+		echo "Directory not found"
+		exit 1
+	fi
+	
+	cd $input
+	
+	for epub in *.epub; do
+		./epub2cbz_converter "$epub"
+	done
+	
 fi
 
-# Convert single file
-if [ -n "$single_file" ]; then
-  if [ ! -f "$single_file" ]; then
-    echo "Error: File '$single_file' does not exist."
-    exit 1
-  fi
-
-  echo "Converting single file: $single_file"
-  "$convert_script" "$single_file"
-  exit $?
+if [ $directoryBool -eq 0 ]; then
+	if [ ! -f "$input" ]; then
+		echo "File not found"
+		exit 1
+	fi
+	if [ ".${input##*.}" != ".epub" ]; then
+		echo "Not an epub"
+		exit 1
+	fi
+	
+	./epub2cbz_converter"$options" "$input"
 fi
 
-# Convert batch of files
-if [ ! -d "$target_dir" ]; then
-  echo "Error: Directory '$target_dir' does not exist."
-  exit 1
-fi
-
-echo "Converting all EPUBs in '$target_dir' with up to $max_parallel jobs..."
-
-find "$target_dir" -maxdepth 1 -type f -iname '*.epub' -print0 | \
-xargs -0 -P "$max_parallel" -I {} "$convert_script" "{}"
-
+#echo "epub2cbz$options" "$input"
+#echo "Directory Bool = $directoryBool" 

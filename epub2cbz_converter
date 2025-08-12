@@ -9,10 +9,10 @@ cover=""
 
 
 #options
-while getopts "c:i:j" opt; do
+while getopts "c:ij" opt; do
 	case $opt in
  		j) japaneseMode=1 ;;
- 	     	i) imageDir="$OPTARG" ;;
+ 	     	i) imageDir="ordered_images" ;;
 		c) cover="$originalDir/$OPTARG" ;;
 		*)
         	exit 1
@@ -22,9 +22,7 @@ done
 
 shift $((OPTIND - 1))
 
-filename=${!#}
-
-echo "This is the cover "+$cover
+filename="${!#}"
 
 if [ $japaneseMode -eq 1 ]; then
 	echo "ほう… 向かってくるのか…　逃げずにこのソフトに近づいてくるのか…"
@@ -33,22 +31,28 @@ fi
 echo "Making working directory"
 mkdir -p .working_$$
 
-temp=${filename%.epub}.zip
+temp="${filename%.epub}.zip"
 echo "Copying ${filename} to Working"
-cp -f $filename .working_$$/${filename%.epub}.zip
-filename=$temp
+cp -f "$filename" ".working_$$/${filename%.epub}.zip"
+filename="$temp"
 
-cd .working_$$
+cd ".working_$$" 
 
 echo "unzipping $filename" 
-unzip -oq $filename
+unzip -oq "$filename"
 
 echo "copying images"
 mkdir -p pics
 
+if [ -n "$imageDir" ]; then
+	$originalDir/imageRenamer $(pwd)
+fi
+
 if [ -z "$imageDir" ]; then
+	echo "Reorganizing images"
 	imageDir=$(find . -type d -name images)
 fi
+
 cp -f $imageDir/* pics/
 
 cd pics
@@ -64,18 +68,22 @@ imageCount=1
 barWidth=40
 
 startNum=0
+
+if [ -n "$cover" ]; then
+	echo "This is the cover $cover"
+fi
+
 if [ -z "$cover" ]; then
 	coverCheck=$(find "$originalDir/.working_$$/" -type f -iname cover.jpeg | head -n 1)
-	if [ -n coverCheck ]; then
-		cover=$coverCheck
+	if [ -n "$coverCheck" ]; then
+		cover="$coverCheck"
 	else
-		cover=${fileList[0]}
+		cover="${fileList[0]}"
 	fi
 	startNum=1
 fi
 
-echo "THis is the cover "+$cover
-magick $cover new/0.png
+magick "$cover" "new/0.png"
 
 echo "Working..."
  
@@ -85,10 +93,10 @@ do
 		#echo ${fileList[i]}
 		#echo ${fileList[i+1]}
 		#echo $imageCount
-		if [ $japaneseMode -eq 1 ]; then
-			magick ${fileList[i+1]} ${fileList[i]} +append new/${imageCount}.png
+		if [ "$japaneseMode" -eq 1 ]; then
+			magick "${fileList[i+1]}" "${fileList[i]}" +append "new/${imageCount}.png"
 		else
-			magick ${fileList[i]} ${fileList[i+1]} +append new/${imageCount}.png
+			magick "${fileList[i]}" "${fileList[i+1]}" +append "new/${imageCount}.png"
 		fi
 		imageCount=$((imageCount+1))
 
@@ -108,12 +116,13 @@ done
 bar=$(printf "%0.s#" $(seq 1 $barWidth))
 printf "\r[%s] - 100%% Done!\n" "$bar"
 
-if [ $japaneseMode -eq 1 ]; then
+if [ "$japaneseMode" -eq 1 ]; then
+	
 	imageCount=$((imageCount+1))
-	magick $cover new/${imageCount}.png
+	magick "$cover" "new/${imageCount}.png"
 	
-	readarray -t fileList < <(find . -maxdepth 1 -type f \( -iname '*.jpeg' -o -iname '*.jpg' -o -iname     '*.png' \) | sort -V | cut -c3-)
-	
+	readarray -t fileList < <(find new -maxdepth 1 -type f \( -name '*.jpeg' -o -name '*.jpg' -o -name '*.png' \) | sort -V)
+	echo ${fileList[@]}
 
 	# Reverse the array
 	for ((i=0, j=${#fileList[@]}-1; i<j; i++, j--)); do
@@ -129,11 +138,11 @@ echo "Finishing up..."
 
 filename=${filename%.zip}.cbz
 
-zip -q $filename new/*
+zip -q "$filename" new/*
 
 
 mkdir -p $originalDir/converted
-mv $filename $originalDir/converted
+mv "$filename" $originalDir/converted
 cd $originalDir
 rm -r .working_$$/*
 rmdir  .working_$$
