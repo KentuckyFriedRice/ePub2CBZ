@@ -15,8 +15,8 @@ epub2cbz [-i jumbled_mode] [-j Japan_mode] [-d directory_mode] [file.epub | dire
                      html files. I've only needed it once so it only works in one scenario. For now.
 
 -j Japan_mode     -- This reverses the images for reading right-to-left. It adds an extra cover at the end then
-                     reverses the order of the images. This way you can read from the back and swipe right instead
-                     of left.
+                     reverses the order of the images. This way you can read from the last page and swipe right 
+                     instead of left.
 
 -d directory_mode -- This just specifies the input is a directory name (use . for current directory) rather than a
                      single epub file and it will convert all epub files in that directory.
