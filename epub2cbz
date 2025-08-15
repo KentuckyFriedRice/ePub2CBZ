@@ -20,11 +20,11 @@ shift $((OPTIND - 1))
 
 input="${!#}"
  
-if [ ! -x "epub2cbz_converter" ]; then
+if ! command -v "epub2cbz_converter" >/dev/null 2>&1; then
 	echo "You need 'epub2cbz_converter' and it wasn't found in this directory or it's not executable"
 	exit 1
 fi
-if [ ! -x "imageRenamer" ]; then
+if ! command -v "imageRenamer" >/dev/null 2>&1; then
 	echo "You need 'imageRenamer' and it wasn't found in this directory or it's not executable"
 	exit 1
 fi
@@ -38,9 +38,9 @@ if [ $directoryBool -eq 1 ]; then
 	cd $input
 	
 	for epub in *.epub; do
-		./epub2cbz_converter "$epub"
+		epub2cbz_converter "$epub"
 	done
-	
+
 fi
 
 if [ $directoryBool -eq 0 ]; then
@@ -53,7 +53,8 @@ if [ $directoryBool -eq 0 ]; then
 		exit 1
 	fi
 	
-	./epub2cbz_converter"$options" "$input"
+	options=${options# }
+	epub2cbz_converter $options "$input"
 fi
 
 #echo "epub2cbz$options" "$input"

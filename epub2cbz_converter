@@ -32,32 +32,29 @@ echo "Making working directory"
 mkdir -p .working_$$
 
 temp="${filename%.epub}.zip"
-echo "Copying ${filename} to Working"
+
 cp -f "$filename" ".working_$$/${filename%.epub}.zip"
 filename="$temp"
 
 cd ".working_$$" 
 
-echo "unzipping $filename" 
 unzip -oq "$filename"
 
 echo "copying images"
 mkdir -p pics
 
 if [ -n "$imageDir" ]; then
-	$originalDir/imageRenamer $(pwd)
+	echo "Reorganizing images"
+	imageRenamer $(pwd)
 fi
 
 if [ -z "$imageDir" ]; then
-	echo "Reorganizing images"
 	imageDir=$(find . -type d -name images)
 fi
 
 cp -f $imageDir/* pics/
 
 cd pics
-#numberOfFiles=$(ls | wc -l)
-#echo $numberOfFiles
 
 mkdir -p new
 
@@ -90,9 +87,7 @@ echo "Working..."
 for i in $(seq $startNum 2 $((fileListLength-1)))
 do
 	if [ $((i + 1)) -le $((fileListLength-1)) ]; then
-		#echo ${fileList[i]}
-		#echo ${fileList[i+1]}
-		#echo $imageCount
+		
 		if [ "$japaneseMode" -eq 1 ]; then
 			magick "${fileList[i+1]}" "${fileList[i]}" +append "new/${imageCount}.png"
 		else
@@ -118,11 +113,12 @@ printf "\r[%s] - 100%% Done!\n" "$bar"
 
 if [ "$japaneseMode" -eq 1 ]; then
 	
+	echo "Reversing Image Order..."
+
 	imageCount=$((imageCount+1))
 	magick "$cover" "new/${imageCount}.png"
 	
 	readarray -t fileList < <(find new -maxdepth 1 -type f \( -name '*.jpeg' -o -name '*.jpg' -o -name '*.png' \) | sort -V)
-	echo ${fileList[@]}
 
 	# Reverse the array
 	for ((i=0, j=${#fileList[@]}-1; i<j; i++, j--)); do
@@ -146,3 +142,5 @@ mv "$filename" $originalDir/converted
 cd $originalDir
 rm -r .working_$$/*
 rmdir  .working_$$
+
+echo "Finished! Enjoy Reading :)"
