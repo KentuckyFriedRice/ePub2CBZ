@@ -9,6 +9,8 @@ finally zipping that folder into cbz format.
 It doesn't work every time yet, but I will be making modifications in the future to cover more layouts within
 the epubs
 
+USAGE:
+
 epub2cbz [-i jumbled_mode] [-j Japan_mode] [-d directory_mode] [file.epub | directory]
 
 -i jumbled_mode   -- This is for when the images are out of order. This option invokes imageRenamer and checks through 
