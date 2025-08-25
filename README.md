@@ -22,3 +22,5 @@ epub2cbz [-i jumbled_mode] [-j Japan_mode] [-d directory_mode] [file.epub | dire
 
 -d directory_mode -- This just specifies the input is a directory name (use . for current directory) rather than a
                      single epub file and it will convert all epub files in that directory.
+
+-c cover          -- This allows you to enter the path of an alternate cover. It only works on non-shuffled files as of now
