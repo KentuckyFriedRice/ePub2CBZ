@@ -5,6 +5,15 @@ currentDir=pwd
 if [ -n $1 ]; then
 	current=$1
 fi
+current=$1
+
+#Getting the naming convention fo the html files
+first="$(find . -maxdepth 1 \( -name '*1*.html' -o -name '*1*.xhtml' \) | head -n1)"
+prefix="$(echo "$first" | sed -E 's/[0-9]+.*//')"
+prefix="${prefix/.\//}"
+#echo "Prefix is $prefix"
+extension=".${first##*.}"
+#echo "Extension is $extension"
 
 # Folder where your HTML files are
 html_dir="."
@@ -17,12 +26,14 @@ dest_dir="$1/ordered_images"
 
 mkdir -p "$dest_dir"
 
-for html_file in "$html_dir"/index_split_*.html; do
+for html_file in "$html_dir"/"$prefix"*"$extension"; do
     # Extract number from filename, e.g. 000 from index_split_000.html
-    num=$(basename "$html_file" | sed -E 's/index_split_([0-9]+)\.html/\1/')
+    #num=$(basename "$html_file" | sed -E "s/${prefix}([0-9]+)\.${extension}/\1/")
+    num="${html_file/$prefix/}"
+    num="${num%$extension}"
 
     # Extract the image filename from the <img src="..."> tag
-    img_name=$(grep -oP '<img src="images/\K[^"]+' "$html_file")
+    img_name=$(sed -n 's/.*<img src="images\/\([^"]*\)".*/\1/p' "$html_file")
 
     if [[ -z "$img_name" ]]; then
         #echo "No image found in $html_file"
