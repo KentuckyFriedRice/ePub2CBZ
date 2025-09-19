@@ -1,3 +1,4 @@
+### Background
 I made this to convert a large number of epub comics I had since epub doesn't work super well for comics.
 This is made for my e-ink tablet, the supernote manta in mind. It will have the cover page as vertical 
 and the other pages as if you were actually reading a comic, so a side-by-side, 2-page view. 
@@ -9,7 +10,7 @@ finally zipping that folder into cbz format.
 It doesn't work every time yet, but I will be making modifications in the future to cover more layouts within
 the epubs
 
-USAGE:
+### How To Use
 
 epub2cbz [-i jumbled_mode] [-j Japan_mode] [-d directory_mode] [file.epub | directory]
 
