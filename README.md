@@ -25,3 +25,10 @@ the epubs
                      single epub file and it will convert all epub files in that directory.
 
 **-c**  *cover*          -- This allows you to enter the path of an alternate cover. It only works on non-shuffled files as of now
+
+### File Layout
+| Script Name | Description |
+-----|-----
+| epub2cbz | This is the main script that takes in all the options and file/directory. This is its own file because it is what handles the difference between a single epub file and a directory. |
+| epub2cbz_converter | This is script which does the conversion. It takes a single file and options. You can use it independently for a single file if you wanted. I chose to leave it for the convenience of using one command. |
+| imageRenamer | This is the script that unshuffles images. It reads the html file of each page and copies the associated image file into a new directory named as the page number. It then uses this new directory to make the cbz file. |
