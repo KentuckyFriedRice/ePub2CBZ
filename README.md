@@ -12,16 +12,16 @@ the epubs
 
 ### How To Use
 
-epub2cbz [-i jumbled_mode] [-j Japan_mode] [-d directory_mode] [file.epub | directory]
+**epub2cbz** [ **-i**  *jumbled_mode* ]  [ **-j**  *Japan_mode* ]  [ **-d**  *directory_mode* ]  [ ***file.epub*** | ***directory*** ]
 
--i jumbled_mode   -- This is for when the images are out of order. This option invokes imageRenamer and checks through 
+**-i**  *jumbled_mode*   -- This is for when the images are out of order. This option invokes imageRenamer and checks through 
                      html files. I've only needed it once so it only works in one scenario. For now.
 
--j Japan_mode     -- This reverses the images for reading right-to-left. It adds an extra cover at the end then
+**-j**  *Japan_mode*     -- This reverses the images for reading right-to-left. It adds an extra cover at the end then
                      reverses the order of the images. This way you can read from the last page and swipe right 
                      instead of left.
 
--d directory_mode -- This just specifies the input is a directory name (use . for current directory) rather than a
+**-d**  *directory_mode* -- This just specifies the input is a directory name (use . for current directory) rather than a
                      single epub file and it will convert all epub files in that directory.
 
--c cover          -- This allows you to enter the path of an alternate cover. It only works on non-shuffled files as of now
+**-c**  *cover*          -- This allows you to enter the path of an alternate cover. It only works on non-shuffled files as of now
