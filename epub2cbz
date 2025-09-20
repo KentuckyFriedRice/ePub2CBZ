@@ -1,13 +1,17 @@
 #!/bin/bash
 
-directoryBool=0
+#Is the user asking to use a directory?
+isDirectory=0
+
+#options to pass on to epub2cbz_converter
 options=""
 
+#Collects options and sets variables for the next steps; echos usage if there is an error in how options are used
 while getopts "c:dji" opt; do
 	case $opt in
 		c) options+=" -c $OPTARG" ;;
 		i) options+=" -i" ;;
-		d) directoryBool=1 ;;
+		d) isDirectory=1 ;;
 		j) options+=" -j" ;;
 		*)
 		  echo "Usage: $0 [-i jumbled] [-j Japan_mode] [-d directory] [file.epub | directory]"
@@ -16,10 +20,13 @@ while getopts "c:dji" opt; do
 	esac
 done
 
+#shifts options down done
 shift $((OPTIND - 1))
 
-input="${!#}"
- 
+#sets the filename or directory as variable "input."
+input=${!#}
+
+#Checks for epub2cbz_converter and imageRenamer
 if ! command -v "epub2cbz_converter" >/dev/null 2>&1; then
 	echo "You need 'epub2cbz_converter' and it wasn't found in this directory or it's not executable"
 	exit 1
@@ -29,21 +36,28 @@ if ! command -v "imageRenamer" >/dev/null 2>&1; then
 	exit 1
 fi
 
-if [ $directoryBool -eq 1 ]; then
-	if [ ! -d "$input" ]; then
+#Checks if directory exists and executes epub2cbz_converter with options
+if [ $isDirectory -eq 1 ]; then
+	if [ ! -d $input ]; then
 		echo "Directory not found"
 		exit 1
 	fi
 	
+	#changes working directory to user's directory
 	cd $input
-	
+
+	#sets options removes space
+	options=${options# }
+
+	#converts all epub files in the directory
 	for epub in *.epub; do
-		epub2cbz_converter "$epub"
+		epub2cbz_converter $options "$epub"
 	done
 
 fi
 
-if [ $directoryBool -eq 0 ]; then
+#Checks if the file exists and if so converts the file using the options.
+if [ $isDirectory -eq 0 ]; then
 	if [ ! -f "$input" ]; then
 		echo "File not found"
 		exit 1
@@ -56,6 +70,3 @@ if [ $directoryBool -eq 0 ]; then
 	options=${options# }
 	epub2cbz_converter $options "$input"
 fi
-
-#echo "epub2cbz$options" "$input"
-#echo "Directory Bool = $directoryBool" 

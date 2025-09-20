@@ -28,14 +28,13 @@ mkdir -p "$dest_dir"
 
 for html_file in "$html_dir"/"$prefix"*"$extension"; do
     # Extract number from filename, e.g. 000 from index_split_000.html
-    #num=$(basename "$html_file" | sed -E "s/${prefix}([0-9]+)\.${extension}/\1/")
     num="${html_file/$prefix/}"
     num="${num%$extension}"
 
     # Extract the image filename from the <img src="..."> tag
     img_name=$(sed -n 's/.*<img src="images\/\([^"]*\)".*/\1/p' "$html_file")
 
-    if [[ -z "$img_name" ]]; then
+    if [ -z "$img_name" ]; then
         #echo "No image found in $html_file"
         continue
     fi
@@ -43,7 +42,8 @@ for html_file in "$html_dir"/"$prefix"*"$extension"; do
     # Source image path
     src_img="$img_dir/$img_name"
 
-    if [[ ! -f "$src_img" ]]; then
+    #Checks if the source image exists
+    if [ ! -f "$src_img" ]; then
         echo "Image $src_img not found!"
         continue
     fi
@@ -52,6 +52,5 @@ for html_file in "$html_dir"/"$prefix"*"$extension"; do
     dest_img="$dest_dir/${num}.jpg"
 
     cp "$src_img" "$dest_img"
-    #echo "Copied $src_img to $dest_img"
 done
 
