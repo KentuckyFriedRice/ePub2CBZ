@@ -34,3 +34,5 @@ finally zipping that folder into cbz format. The finished cbz file is saved in a
 - If you do jumbled and Japan mode and also set a custom cover, the pictures get moved forward one. I'm sure it's a logic problem but I haven't had time to find the issue.
 - I don't think it works with every epub comicbook. I just update the code as I need it.
 - There might be some issue with filenames but I haven't been able to pinpoint when it happens.
+- You have to hold Ctrl+C to cancel the process.
+- If you cancel the process, the folder isn't automatically cleaned up.
