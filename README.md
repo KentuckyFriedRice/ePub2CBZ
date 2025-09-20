@@ -5,10 +5,7 @@ and the other pages as if you were actually reading a comic, so a side-by-side, 
 
 It works by copying the epub to a hidden folder, changing the file extension to zip, unzipping it, finding
 the "images" folder, paste the pages together using imagemagick, then put all the files together in a folder,
-finally zipping that folder into cbz format.
-
-It doesn't work every time yet, but I will be making modifications in the future to cover more layouts within
-the epubs
+finally zipping that folder into cbz format. The finished cbz file is saved in a folder named "converted."
 
 ### How To Use
 
@@ -32,3 +29,8 @@ the epubs
 | epub2cbz | This is the main script that takes in all the options and file/directory. This is its own file because it is what handles the difference between a single epub file and a directory. |
 | epub2cbz_converter | This is script which does the conversion. It takes a single file and options. You can use it independently for a single file if you wanted. I chose to leave it for the convenience of using one command. |
 | imageRenamer | This is the script that unshuffles images. It reads the html file of each page and copies the associated image file into a new directory named as the page number. It then uses this new directory to make the cbz file. |
+
+### Known Problems
+- If you do jumbled and Japan mode and also set a custom cover, the pictures get moved forward one. I'm sure it's a logic problem but I haven't had time to find the issue.
+- I don't think it works with every epub comicbook. I just update the code as I need it.
+- There might be some issue with filenames but I haven't been able to pinpoint when it happens.
